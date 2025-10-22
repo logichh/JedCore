@@ -1,0 +1,64 @@
+package com.jedk1.jedcore.configuration;
+
+import com.jedk1.jedcore.JedCore;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
+
+import java.io.File;
+
+public class Config {
+
+	JedCore plugin;
+
+	private final File file;
+	public FileConfiguration config;
+
+	public Config(File file) {
+		this.plugin = JedCore.plugin;
+		this.file = new File(plugin.getDataFolder() + File.separator + file);
+		this.config = YamlConfiguration.loadConfiguration(this.file);
+		reloadConfig();
+	}
+
+	public void createConfig() {
+		if (!file.getParentFile().exists()) {
+			try {
+				file.getParentFile().mkdir();
+				plugin.getLogger().info("Generating new directory for " + file.getName() + "!");
+			} catch (Exception e) {
+				plugin.getLogger().warning("Failed to generate directory: " + e.getMessage());
+			}
+		}
+
+		if (!file.exists()) {
+			try {
+				file.createNewFile();
+				plugin.getLogger().info("Generating new " + file.getName() + "!");
+			} catch (Exception e) {
+				plugin.getLogger().warning("Failed to generate " + file.getName() + ": " + e.getMessage());
+			}
+		}
+	}
+
+	public FileConfiguration getConfig() {
+		return config;
+	}
+	
+	public void reloadConfig() {
+		createConfig();
+		try {
+			config.load(file);
+		} catch (Exception e) {
+			plugin.getLogger().warning("Failed to save config: " + e.getMessage());
+		}
+	}
+
+	public void saveConfig() {
+		try {
+			config.options().copyDefaults(true);
+			config.save(file);
+		} catch (Exception e) {
+			plugin.getLogger().warning("Failed to save config: " + e.getMessage());
+		}
+	}
+}
